@@ -1,11 +1,26 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    },
+    transports: ['websocket', 'polling'],
+    pingTimeout: 10000,
+    pingInterval: 5000
+});
 const path = require('path');
 
-// Serve static files
-app.use(express.static('public'));
+// Serve static files with caching
+app.use(express.static('public', {
+    maxAge: '1h',
+    setHeaders: function(res, path) {
+        if (path.endsWith('.js')) {
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+        }
+    }
+}));
 
 // Game state
 const gameState = {

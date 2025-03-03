@@ -11,8 +11,18 @@ class Game {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        // Socket.IO connection
-        this.socket = io();
+        // Socket.IO connection with Vercel configuration
+        const serverUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : window.location.origin;
+            
+        this.socket = io(serverUrl, {
+            reconnectionAttempts: 5,
+            timeout: 10000,
+            transports: ['websocket', 'polling'],
+            forceNew: true,
+            reconnection: true
+        });
         this.players = new Map();
         this.localPlayer = null;
         this.ball = null;
@@ -84,13 +94,18 @@ class Game {
     initializeSocketListeners() {
         // Debug connection status
         this.socket.on('connect', () => {
-            console.log('\n=== Connected to Server ===');
-            console.log('Socket ID:', this.socket.id);
+            console.log('Connected to server successfully');
+            document.getElementById('instructions').style.display = 'block';
             console.log('Current players:', Array.from(this.players.keys()));
         });
 
-        this.socket.on('disconnect', () => {
-            console.log('\n=== Disconnected from Server ===');
+        this.socket.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+            document.getElementById('instructions').innerHTML += '<p style="color: red">Connection error. Please refresh the page.</p>';
+        });
+
+        this.socket.on('disconnect', (reason) => {
+            console.log('Disconnected from server:', reason);
             console.log('Clearing all players...');
             // Clear all players on disconnect
             this.players.forEach(player => {
@@ -101,11 +116,6 @@ class Game {
             this.players.clear();
             this.localPlayer = null;
             console.log('Players cleared');
-        });
-
-        this.socket.on('connect_error', (error) => {
-            console.error('\n=== Connection Error ===');
-            console.error('Error details:', error);
         });
 
         // Handle initial game state
