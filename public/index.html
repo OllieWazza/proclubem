@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soccer Combat</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #gameCanvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        #ui {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        #instructions {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        #score {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 24px;
+        }
+        #stats {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .bar {
+            width: 200px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 5px 0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        #healthBar .fill {
+            height: 100%;
+            background: #ff3333;
+            width: 100%;
+            transition: width 0.2s;
+        }
+        #staminaBar .fill {
+            height: 100%;
+            background: #33ff33;
+            width: 100%;
+            transition: width 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+        <div id="instructions">
+            <h3>How to Play:</h3>
+            <p>- Score goals to win (first to 20 resets the match)!</p>
+            <p>- Use combat to stop opponents.</p>
+            <div id="gameStats">
+                <p>FPS: <span id="fpsCounter">0</span></p>
+                <p>Players Online: <span id="playerCount">0</span></p>
+            </div>
+            <h4>Controls:</h4>
+            <p>- WASD: Move</p>
+            <p>- Mouse: Look/Aim</p>
+            <p>- Shift: Sprint</p>
+            <p>- Space: Jump</p>
+            <p>- Left Click: Kick Ball (when near)</p>
+            <p>- F: Punch (25 damage)</p>
+            <p>- Q: Shoot Bullets (75 damage)</p>
+            <p>- P: Toggle Debug Mode</p>
+            <p>- Esc: Release Cursor</p>
+        </div>
+        <div id="score">Blue: 0 - Red: 0</div>
+        <div id="stats">
+            <div class="bar" id="healthBar">
+                <div class="fill"></div>
+            </div>
+            <div class="bar" id="staminaBar">
+                <div class="fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/ball.js"></script>
+    <script src="js/stadium.js"></script>
+    <script src="js/combat.js"></script>
+    <script src="js/controls.js"></script>
+</body>
+</html> 
