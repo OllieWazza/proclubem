@@ -14,23 +14,23 @@ class Game {
         // Socket.IO connection with custom domain configuration
         const serverUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : 'wss://www.proclubem.com';
+            : 'https://www.proclubem.com';
             
         this.socket = io(serverUrl, {
-            reconnectionAttempts: 5,
-            timeout: 30000,
+            path: '/socket.io/',
             transports: ['websocket'],
             upgrade: false,
             rememberUpgrade: false,
             secure: true,
             rejectUnauthorized: false,
-            path: '/socket.io/',
             withCredentials: true,
-            forceNew: true,
+            autoConnect: true,
             reconnection: true,
+            reconnectionAttempts: 5,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,
-            autoConnect: true
+            timeout: 20000,
+            forceNew: true
         });
         this.players = new Map();
         this.localPlayer = null;
@@ -103,7 +103,7 @@ class Game {
     initializeSocketListeners() {
         // Debug connection status
         this.socket.on('connect', () => {
-            console.log('Connected to server successfully');
+            console.log('Connected to server successfully with transport:', this.socket.io.engine.transport.name);
             document.getElementById('instructions').style.display = 'block';
             console.log('Current players:', Array.from(this.players.keys()));
         });

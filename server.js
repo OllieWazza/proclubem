@@ -3,24 +3,38 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "https://www.proclubem.com",
+        origin: ["https://www.proclubem.com", "https://proclubem.com"],
         methods: ["GET", "POST"],
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"]
     },
-    allowEIO3: true,
-    transports: ['websocket'],
-    pingTimeout: 30000,
-    pingInterval: 25000,
-    upgradeTimeout: 30000,
-    allowUpgrades: false,
+    path: '/socket.io/',
+    serveClient: true,
+    pingInterval: 10000,
+    pingTimeout: 5000,
     cookie: false,
-    serveClient: false
+    transports: ['websocket'],
+    allowUpgrades: false,
+    perMessageDeflate: false,
+    httpCompression: false,
+    wsEngine: 'ws'
 });
 
 // Enable trust proxy for secure WebSocket behind Vercel proxy
 app.enable('trust proxy');
+app.set('trust proxy', 1);
+
+// CORS middleware
 app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'https://www.proclubem.com');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    
     if (req.headers['x-forwarded-proto'] !== 'https') {
         return res.redirect('https://' + req.headers.host + req.url);
     }
