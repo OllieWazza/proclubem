@@ -19,9 +19,11 @@ class Game {
         this.socket = io(serverUrl, {
             reconnectionAttempts: 5,
             timeout: 10000,
-            transports: ['websocket', 'polling'],
+            transports: ['polling', 'websocket'], // Try polling first, then websocket
             forceNew: true,
-            reconnection: true
+            reconnection: true,
+            secure: true,
+            rejectUnauthorized: false
         });
         this.players = new Map();
         this.localPlayer = null;
