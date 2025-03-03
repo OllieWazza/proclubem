@@ -12,10 +12,6 @@
     ],
     "routes": [
         {
-            "src": "/socket.io/socket.io.js",
-            "dest": "server.js"
-        },
-        {
             "src": "/socket.io/(.*)",
             "dest": "server.js",
             "headers": {
@@ -23,9 +19,15 @@
                 "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization",
                 "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Max-Age": "86400",
-                "Connection": "upgrade",
-                "Upgrade": "websocket"
+                "Access-Control-Max-Age": "86400"
+            }
+        },
+        {
+            "src": "/socket.io/socket.io.js",
+            "dest": "server.js",
+            "headers": {
+                "Content-Type": "application/javascript",
+                "Cache-Control": "public, max-age=3600"
             }
         },
         {

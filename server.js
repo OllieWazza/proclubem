@@ -4,7 +4,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
         origin: ["https://www.proclubem.com", "https://proclubem.com"],
-        methods: ["GET", "POST"],
+        methods: ["GET", "POST", "OPTIONS"],
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"]
     },
@@ -12,12 +12,10 @@ const io = require('socket.io')(http, {
     serveClient: true,
     pingInterval: 10000,
     pingTimeout: 5000,
-    cookie: false,
-    transports: ['websocket'],
-    allowUpgrades: false,
-    perMessageDeflate: false,
-    httpCompression: false,
-    wsEngine: 'ws'
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+    maxHttpBufferSize: 1e8,
+    connectTimeout: 45000
 });
 
 // Enable trust proxy for secure WebSocket behind Vercel proxy
@@ -31,14 +29,28 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
     
+    // Handle preflight requests
     if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
+        res.header('Access-Control-Max-Age', '86400');
+        return res.status(200).end();
+    }
+    
+    // Handle WebSocket upgrade requests
+    if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
+        res.header('Connection', 'Upgrade');
+        res.header('Upgrade', 'websocket');
     }
     
     if (req.headers['x-forwarded-proto'] !== 'https') {
         return res.redirect('https://' + req.headers.host + req.url);
     }
     next();
+});
+
+// Serve static files with appropriate headers
+app.get('/socket.io/socket.io.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(require.resolve('socket.io/client-dist/socket.io.js'));
 });
 
 // Serve static files with caching
