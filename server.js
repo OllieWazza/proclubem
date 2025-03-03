@@ -3,23 +3,28 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*",
+        origin: "https://www.proclubem.com",
         methods: ["GET", "POST"],
-        credentials: true
+        credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"]
     },
     allowEIO3: true,
-    transports: ['polling', 'websocket'],
+    transports: ['websocket'],
     pingTimeout: 30000,
     pingInterval: 25000,
     upgradeTimeout: 30000,
-    allowUpgrades: true,
-    cookie: false
+    allowUpgrades: false,
+    cookie: false,
+    serveClient: false
 });
 
 // Enable trust proxy for secure WebSocket behind Vercel proxy
 app.enable('trust proxy');
 app.use((req, res, next) => {
-    req.secure ? next() : res.redirect('https://' + req.headers.host + req.url);
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+        return res.redirect('https://' + req.headers.host + req.url);
+    }
+    next();
 });
 
 // Serve static files with caching

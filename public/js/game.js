@@ -11,17 +11,17 @@ class Game {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        // Socket.IO connection with Vercel configuration
+        // Socket.IO connection with custom domain configuration
         const serverUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : 'https://' + window.location.hostname;
+            : 'wss://www.proclubem.com';
             
         this.socket = io(serverUrl, {
             reconnectionAttempts: 5,
             timeout: 30000,
-            transports: ['polling', 'websocket'],
-            upgrade: true,
-            rememberUpgrade: true,
+            transports: ['websocket'],
+            upgrade: false,
+            rememberUpgrade: false,
             secure: true,
             rejectUnauthorized: false,
             path: '/socket.io/',

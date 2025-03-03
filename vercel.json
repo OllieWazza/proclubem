@@ -15,13 +15,14 @@
             "src": "/socket.io/(.*)",
             "dest": "server.js",
             "headers": {
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": "https://www.proclubem.com",
                 "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-                "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept,Origin",
+                "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept,Origin,Authorization",
                 "Access-Control-Allow-Credentials": "true",
                 "Access-Control-Max-Age": "86400",
                 "Upgrade": "websocket",
-                "Connection": "upgrade"
+                "Connection": "upgrade",
+                "Sec-WebSocket-Protocol": "socket.io"
             },
             "continue": true
         },
