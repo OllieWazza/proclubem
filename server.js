@@ -4,13 +4,23 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        credentials: true
     },
-    transports: ['websocket', 'polling'],
-    pingTimeout: 10000,
-    pingInterval: 5000
+    allowEIO3: true,
+    transports: ['polling', 'websocket'],
+    pingTimeout: 30000,
+    pingInterval: 25000,
+    upgradeTimeout: 30000,
+    allowUpgrades: true,
+    cookie: false
 });
-const path = require('path');
+
+// Enable trust proxy for secure WebSocket behind Vercel proxy
+app.enable('trust proxy');
+app.use((req, res, next) => {
+    req.secure ? next() : res.redirect('https://' + req.headers.host + req.url);
+});
 
 // Serve static files with caching
 app.use(express.static('public', {

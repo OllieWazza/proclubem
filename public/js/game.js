@@ -14,16 +14,23 @@ class Game {
         // Socket.IO connection with Vercel configuration
         const serverUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : window.location.origin;
+            : 'https://' + window.location.hostname;
             
         this.socket = io(serverUrl, {
             reconnectionAttempts: 5,
-            timeout: 10000,
-            transports: ['polling', 'websocket'], // Try polling first, then websocket
+            timeout: 30000,
+            transports: ['polling', 'websocket'],
+            upgrade: true,
+            rememberUpgrade: true,
+            secure: true,
+            rejectUnauthorized: false,
+            path: '/socket.io/',
+            withCredentials: true,
             forceNew: true,
             reconnection: true,
-            secure: true,
-            rejectUnauthorized: false
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            autoConnect: true
         });
         this.players = new Map();
         this.localPlayer = null;

@@ -17,9 +17,13 @@
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-                "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept",
-                "Access-Control-Allow-Credentials": "true"
-            }
+                "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept,Origin",
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "86400",
+                "Upgrade": "websocket",
+                "Connection": "upgrade"
+            },
+            "continue": true
         },
         {
             "src": "/js/(.*)",
