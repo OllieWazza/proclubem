@@ -14,7 +14,7 @@ class Game {
         // Socket.IO connection with Railway configuration
         const serverUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : 'YOUR_RAILWAY_URL'; // We'll replace this with the actual Railway URL after deployment
+            : 'https://proclubem-production.up.railway.app';
             
         this.socket = io(serverUrl, {
             path: '/socket.io/',
