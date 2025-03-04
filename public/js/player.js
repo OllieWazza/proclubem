@@ -193,6 +193,10 @@ class Player {
     setupControls() {
         this.verticalRotation = 0;
         const maxVerticalRotation = Math.PI / 3; // 60 degrees
+        
+        // Check if we're on mobile
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                        window.innerWidth <= 800 || window.orientation !== undefined;
 
         // Add dev mode toggle
         document.addEventListener('keydown', (event) => {
@@ -206,68 +210,71 @@ class Player {
             }
         });
 
-        // Mouse movement for camera rotation
-        document.addEventListener('mousemove', (event) => {
-            if (document.pointerLockElement === game.renderer.domElement) {
-                // Horizontal rotation
-                this.mesh.rotation.y -= event.movementX * this.rotationSpeed;
-                
-                // Vertical rotation with constraints
-                this.verticalRotation = Math.max(
-                    -maxVerticalRotation,
-                    Math.min(
-                        maxVerticalRotation,
-                        this.verticalRotation - event.movementY * this.rotationSpeed
-                    )
-                );
-            }
-        });
-
-        // Mouse click for kicking
-        game.renderer.domElement.addEventListener('click', () => {
-            if (!document.pointerLockElement) {
-                game.renderer.domElement.requestPointerLock();
-            } else if (game.ball) {
-                const distanceToBall = this.mesh.position.distanceTo(game.ball.mesh.position);
-                if (distanceToBall < 2) {
-                    game.ball.kick(this);
+        // Only set up desktop controls if not on mobile
+        if (!this.isMobile) {
+            // Mouse movement for camera rotation
+            document.addEventListener('mousemove', (event) => {
+                if (document.pointerLockElement === game.renderer.domElement) {
+                    // Horizontal rotation
+                    this.mesh.rotation.y -= event.movementX * this.rotationSpeed;
+                    
+                    // Vertical rotation with constraints
+                    this.verticalRotation = Math.max(
+                        -maxVerticalRotation,
+                        Math.min(
+                            maxVerticalRotation,
+                            this.verticalRotation - event.movementY * this.rotationSpeed
+                        )
+                    );
                 }
-            }
-        });
+            });
 
-        // Movement and action controls
-        document.addEventListener('keydown', (event) => {
-            switch(event.key.toLowerCase()) {
-                case 'w': this.controls.forward = true; break;
-                case 's': this.controls.backward = true; break;
-                case 'a': this.controls.left = true; break;
-                case 'd': this.controls.right = true; break;
-                case 'shift': this.controls.sprint = true; break;
-                case ' ': 
-                    if (!this.isJumping && this.stamina >= 15) {
-                        this.jump();
+            // Mouse click for kicking
+            game.renderer.domElement.addEventListener('click', () => {
+                if (!document.pointerLockElement) {
+                    game.renderer.domElement.requestPointerLock();
+                } else if (game.ball) {
+                    const distanceToBall = this.mesh.position.distanceTo(game.ball.mesh.position);
+                    if (distanceToBall < 2) {
+                        game.ball.kick(this);
                     }
-                    break;
-            }
-        });
+                }
+            });
 
-        document.addEventListener('keyup', (event) => {
-            switch(event.key.toLowerCase()) {
-                case 'w': this.controls.forward = false; break;
-                case 's': this.controls.backward = false; break;
-                case 'a': this.controls.left = false; break;
-                case 'd': this.controls.right = false; break;
-                case 'shift': this.controls.sprint = false; break;
-            }
-        });
+            // Movement and action controls
+            document.addEventListener('keydown', (event) => {
+                switch(event.key.toLowerCase()) {
+                    case 'w': this.controls.forward = true; break;
+                    case 's': this.controls.backward = true; break;
+                    case 'a': this.controls.left = true; break;
+                    case 'd': this.controls.right = true; break;
+                    case 'shift': this.controls.sprint = true; break;
+                    case ' ': 
+                        if (!this.isJumping && this.stamina >= 15) {
+                            this.jump();
+                        }
+                        break;
+                }
+            });
 
-        // Combat controls
-        document.addEventListener('keydown', (event) => {
-            switch(event.key.toLowerCase()) {
-                case 'q': this.shoot(); break;
-                case 'f': this.punch(); break;
-            }
-        });
+            document.addEventListener('keyup', (event) => {
+                switch(event.key.toLowerCase()) {
+                    case 'w': this.controls.forward = false; break;
+                    case 's': this.controls.backward = false; break;
+                    case 'a': this.controls.left = false; break;
+                    case 'd': this.controls.right = false; break;
+                    case 'shift': this.controls.sprint = false; break;
+                }
+            });
+
+            // Combat controls
+            document.addEventListener('keydown', (event) => {
+                switch(event.key.toLowerCase()) {
+                    case 'q': this.shoot(); break;
+                    case 'f': this.punch(); break;
+                }
+            });
+        }
     }
 
     jump() {

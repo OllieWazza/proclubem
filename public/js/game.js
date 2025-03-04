@@ -61,6 +61,9 @@ class Game {
         // Set initial camera position
         this.camera.position.set(0, 30, 50);
         this.camera.lookAt(0, 0, 0);
+        
+        // Initialize mobile controls
+        this.mobileControls = new MobileControls(this);
 
         // Start game loop
         this.animate();
