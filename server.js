@@ -229,7 +229,19 @@ io.on('connection', (socket) => {
     });
 });
 
+// Add a route to check server status
+app.get('/api/status', (req, res) => {
+    res.json({
+        status: 'online',
+        environment: process.env.NODE_ENV || 'development',
+        port: PORT,
+        socketEnabled: true,
+        timestamp: new Date().toISOString()
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    console.log(`Socket.IO server available at ${process.env.NODE_ENV === 'production' ? 'https://proclubem-production.up.railway.app' : 'http://localhost:' + PORT}`);
 }); 

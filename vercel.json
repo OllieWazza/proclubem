@@ -12,14 +12,19 @@
     ],
     "routes": [
         {
+            "src": "/(.*)",
+            "dest": "/server.js"
+        },
+        {
             "src": "/socket.io/(.*)",
             "dest": "server.js",
             "headers": {
-                "Access-Control-Allow-Origin": "https://www.proclubem.com",
-                "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization",
                 "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Max-Age": "86400"
+                "Connection": "upgrade",
+                "Upgrade": "websocket"
             }
         },
         {
@@ -40,6 +45,33 @@
         {
             "src": "/(.*)",
             "dest": "public/$1"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "*"
+                },
+                {
+                    "key": "Access-Control-Allow-Methods",
+                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                },
+                {
+                    "key": "Access-Control-Allow-Headers",
+                    "value": "X-Requested-With, Content-Type, Accept, Authorization"
+                },
+                {
+                    "key": "Access-Control-Allow-Credentials",
+                    "value": "true"
+                },
+                {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                }
+            ]
         }
     ]
 } 

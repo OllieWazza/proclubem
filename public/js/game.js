@@ -12,10 +12,22 @@ class Game {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         // Socket.IO connection with Railway configuration
-        const serverUrl = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : window.location.protocol + '//' + window.location.host;
-            
+        let serverUrl;
+        if (window.location.hostname === 'localhost') {
+            serverUrl = 'http://localhost:3000';
+            console.log('Using local server URL:', serverUrl);
+        } else if (window.location.hostname === 'proclubem-production.up.railway.app') {
+            serverUrl = 'https://proclubem-production.up.railway.app';
+            console.log('Using Railway URL:', serverUrl);
+        } else if (window.location.hostname === 'www.proclubem.com' || window.location.hostname === 'proclubem.com') {
+            serverUrl = 'https://proclubem-production.up.railway.app';
+            console.log('Using custom domain, connecting to Railway backend:', serverUrl);
+        } else {
+            // Fallback to current origin
+            serverUrl = window.location.origin;
+            console.log('Using current origin as server URL:', serverUrl);
+        }
+
         this.socket = io(serverUrl, {
             path: '/socket.io',
             transports: ['websocket'],
