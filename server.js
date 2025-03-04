@@ -3,11 +3,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: [
-            'https://proclubem-production.up.railway.app',
-            'https://www.proclubem.com',
-            'http://localhost:3000'
-        ],
+        origin: '*',  // Allow all origins for now
         methods: ["GET", "POST", "OPTIONS"],
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"]
@@ -16,8 +12,7 @@ const io = require('socket.io')(http, {
     transports: ['websocket'],
     pingInterval: 10000,
     pingTimeout: 5000,
-    connectTimeout: 45000,
-    allowEIO3: true
+    connectTimeout: 45000
 });
 
 // Enable trust proxy for secure WebSocket behind proxy
@@ -26,17 +21,7 @@ app.set('trust proxy', 1);
 
 // CORS middleware
 app.use((req, res, next) => {
-    const allowedOrigins = [
-        'https://proclubem-production.up.railway.app',
-        'https://www.proclubem.com',
-        'http://localhost:3000'
-    ];
-    
-    const origin = allowedOrigins.includes(req.headers.origin) 
-        ? req.headers.origin 
-        : allowedOrigins[0];
-        
-    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');

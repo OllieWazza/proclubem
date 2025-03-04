@@ -16,29 +16,21 @@ class Game {
         if (window.location.hostname === 'localhost') {
             serverUrl = 'http://localhost:3000';
             console.log('Using local server URL:', serverUrl);
-        } else if (window.location.hostname === 'proclubem-production.up.railway.app') {
-            serverUrl = 'https://proclubem-production.up.railway.app';
-            console.log('Using Railway URL:', serverUrl);
-        } else if (window.location.hostname === 'www.proclubem.com' || window.location.hostname === 'proclubem.com') {
-            serverUrl = 'https://proclubem-production.up.railway.app';
-            console.log('Using custom domain, connecting to Railway backend:', serverUrl);
         } else {
-            // Fallback to current origin
-            serverUrl = window.location.origin;
-            console.log('Using current origin as server URL:', serverUrl);
+            // For Railway deployment or custom domain
+            serverUrl = 'https://proclubem-production.up.railway.app';
+            console.log('Connecting to Railway backend:', serverUrl);
         }
 
         this.socket = io(serverUrl, {
             path: '/socket.io',
             transports: ['websocket'],
             secure: true,
-            rejectUnauthorized: false,
             reconnection: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,
-            timeout: 45000,
-            withCredentials: true
+            timeout: 45000
         });
         this.players = new Map();
         this.localPlayer = null;
