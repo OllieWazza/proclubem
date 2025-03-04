@@ -3,7 +3,11 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: '*',  // Allow all origins for now
+        origin: [
+            'https://proclubem-production.up.railway.app',
+            'https://www.proclubem.com',
+            'http://localhost:3000'
+        ],
         methods: ["GET", "POST", "OPTIONS"],
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"]
@@ -22,7 +26,17 @@ app.set('trust proxy', 1);
 
 // CORS middleware
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    const allowedOrigins = [
+        'https://proclubem-production.up.railway.app',
+        'https://www.proclubem.com',
+        'http://localhost:3000'
+    ];
+    
+    const origin = allowedOrigins.includes(req.headers.origin) 
+        ? req.headers.origin 
+        : allowedOrigins[0];
+        
+    res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -37,6 +51,11 @@ app.use((req, res, next) => {
     if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
         res.header('Connection', 'Upgrade');
         res.header('Upgrade', 'websocket');
+    }
+    
+    // Redirect HTTP to HTTPS in production
+    if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
+        return res.redirect('https://' + req.headers.host + req.url);
     }
     
     next();
