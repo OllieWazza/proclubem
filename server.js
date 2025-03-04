@@ -1,19 +1,5 @@
 const express = require('express');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http, {
-    cors: {
-        origin: '*',  // Allow all origins for now
-        methods: ["GET", "POST", "OPTIONS"],
-        credentials: true,
-        allowedHeaders: ["Content-Type", "Authorization"]
-    },
-    path: '/socket.io',
-    transports: ['websocket'],
-    pingInterval: 10000,
-    pingTimeout: 5000,
-    connectTimeout: 45000
-});
 
 // Enable trust proxy for secure WebSocket behind proxy
 app.enable('trust proxy');
@@ -61,6 +47,35 @@ app.use(express.static('public', {
         }
     }
 }));
+
+// Add a route to check server status - IMPORTANT: This must be defined before Socket.IO
+app.get('/api/status', (req, res) => {
+    res.json({
+        status: 'online',
+        environment: process.env.NODE_ENV || 'development',
+        port: process.env.PORT || 3000,
+        socketEnabled: true,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Create HTTP server
+const http = require('http').createServer(app);
+
+// Initialize Socket.IO after HTTP server
+const io = require('socket.io')(http, {
+    cors: {
+        origin: '*',  // Allow all origins for now
+        methods: ["GET", "POST", "OPTIONS"],
+        credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"]
+    },
+    path: '/socket.io',
+    transports: ['websocket'],
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    connectTimeout: 45000
+});
 
 // Game state
 const gameState = {
@@ -211,17 +226,6 @@ io.on('connection', (socket) => {
         console.log('Player disconnected:', socket.id);
         gameState.players.delete(socket.id);
         io.emit('playerDisconnected', socket.id);
-    });
-});
-
-// Add a route to check server status
-app.get('/api/status', (req, res) => {
-    res.json({
-        status: 'online',
-        environment: process.env.NODE_ENV || 'development',
-        port: PORT,
-        socketEnabled: true,
-        timestamp: new Date().toISOString()
     });
 });
 
