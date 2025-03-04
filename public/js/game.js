@@ -10,6 +10,7 @@ class Game {
         this.renderer.setClearColor(0x87CEEB); // Sky blue color
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(this.renderer.domElement);
 
         // Socket.IO connection setup
         let serverUrl;
@@ -50,6 +51,9 @@ class Game {
         this.frameCount = 0;
         this.lastFpsUpdate = 0;
 
+        // Initialize mobile controls first
+        this.mobileControls = new MobileControls(this);
+
         // Initialize game components
         this.setupLighting();
         this.setupEventListeners();
@@ -62,9 +66,6 @@ class Game {
         this.camera.position.set(0, 30, 50);
         this.camera.lookAt(0, 0, 0);
         
-        // Initialize mobile controls
-        this.mobileControls = new MobileControls(this);
-
         // Start game loop
         this.animate();
     }

@@ -125,8 +125,8 @@ class MobileControls {
         this.container.style.left = '0';
         this.container.style.width = '100%';
         this.container.style.height = '100%';
-        this.container.style.pointerEvents = 'none';
-        this.container.style.zIndex = '1000';
+        this.container.style.pointerEvents = 'auto';
+        this.container.style.zIndex = '9999';
         document.body.appendChild(this.container);
         
         // Create movement joystick
@@ -156,9 +156,10 @@ class MobileControls {
         joystick.style.width = `${this.joystickSize}px`;
         joystick.style.height = `${this.joystickSize}px`;
         joystick.style.borderRadius = '50%';
-        joystick.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-        joystick.style.border = '2px solid rgba(255, 255, 255, 0.5)';
+        joystick.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+        joystick.style.border = '2px solid rgba(255, 255, 255, 0.8)';
         joystick.style.pointerEvents = 'auto';
+        joystick.style.touchAction = 'none';
         
         if (position === 'left') {
             joystick.style.left = `${this.margin}px`;
@@ -179,7 +180,7 @@ class MobileControls {
         inner.style.width = `${this.joystickSize / 2}px`;
         inner.style.height = `${this.joystickSize / 2}px`;
         inner.style.borderRadius = '50%';
-        inner.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+        inner.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
         inner.style.left = '50%';
         inner.style.top = '50%';
         inner.style.transform = 'translate(-50%, -50%)';
@@ -211,8 +212,8 @@ class MobileControls {
             button.style.width = `${this.actionButtonSize}px`;
             button.style.height = `${this.actionButtonSize}px`;
             button.style.borderRadius = '50%';
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-            button.style.border = '2px solid rgba(255, 255, 255, 0.5)';
+            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+            button.style.border = '2px solid rgba(255, 255, 255, 0.8)';
             button.style.display = 'flex';
             button.style.justifyContent = 'center';
             button.style.alignItems = 'center';
@@ -221,6 +222,7 @@ class MobileControls {
             button.style.fontSize = '12px';
             button.style.userSelect = 'none';
             button.style.pointerEvents = 'auto';
+            button.style.touchAction = 'none';
             
             // Set position
             Object.keys(config.position).forEach(key => {
