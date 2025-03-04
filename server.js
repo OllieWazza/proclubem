@@ -4,19 +4,17 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
         origin: process.env.NODE_ENV === 'production' 
-            ? ['https://www.proclubem.com', 'https://proclubem.com']
+            ? 'https://proclubem-production.up.railway.app'
             : 'http://localhost:3000',
         methods: ["GET", "POST", "OPTIONS"],
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"]
     },
-    path: '/socket.io/',
-    serveClient: true,
+    path: '/socket.io',
+    serveClient: false,
     pingInterval: 10000,
     pingTimeout: 5000,
-    transports: ['websocket', 'polling'],
-    allowEIO3: true,
-    maxHttpBufferSize: 1e8,
+    transports: ['websocket'],
     connectTimeout: 45000
 });
 
@@ -27,7 +25,7 @@ app.set('trust proxy', 1);
 // CORS middleware
 app.use((req, res, next) => {
     const origin = process.env.NODE_ENV === 'production'
-        ? 'https://www.proclubem.com'
+        ? 'https://proclubem-production.up.railway.app'
         : 'http://localhost:3000';
         
     res.header('Access-Control-Allow-Origin', origin);
@@ -45,6 +43,7 @@ app.use((req, res, next) => {
     if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
         res.header('Connection', 'Upgrade');
         res.header('Upgrade', 'websocket');
+        res.header('Sec-WebSocket-Protocol', 'websocket');
     }
     
     if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {

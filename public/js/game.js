@@ -17,20 +17,15 @@ class Game {
             : 'https://proclubem-production.up.railway.app';
             
         this.socket = io(serverUrl, {
-            path: '/socket.io/',
-            transports: ['websocket', 'polling'],
-            upgrade: true,
-            rememberUpgrade: true,
+            path: '/socket.io',
+            transports: ['websocket'],
             secure: true,
             rejectUnauthorized: false,
-            withCredentials: true,
-            autoConnect: true,
             reconnection: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,
-            timeout: 45000,
-            forceNew: true
+            timeout: 45000
         });
         this.players = new Map();
         this.localPlayer = null;
