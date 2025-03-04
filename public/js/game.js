@@ -11,10 +11,10 @@ class Game {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        // Socket.IO connection with custom domain configuration
+        // Socket.IO connection with Railway configuration
         const serverUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : window.location.protocol + '//' + window.location.host;
+            : 'YOUR_RAILWAY_URL'; // We'll replace this with the actual Railway URL after deployment
             
         this.socket = io(serverUrl, {
             path: '/socket.io/',

@@ -3,7 +3,9 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: ["https://www.proclubem.com", "https://proclubem.com"],
+        origin: process.env.NODE_ENV === 'production' 
+            ? ['https://www.proclubem.com', 'https://proclubem.com']
+            : 'http://localhost:3000',
         methods: ["GET", "POST", "OPTIONS"],
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"]
@@ -18,13 +20,17 @@ const io = require('socket.io')(http, {
     connectTimeout: 45000
 });
 
-// Enable trust proxy for secure WebSocket behind Vercel proxy
+// Enable trust proxy for secure WebSocket behind proxy
 app.enable('trust proxy');
 app.set('trust proxy', 1);
 
 // CORS middleware
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://www.proclubem.com');
+    const origin = process.env.NODE_ENV === 'production'
+        ? 'https://www.proclubem.com'
+        : 'http://localhost:3000';
+        
+    res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -41,7 +47,7 @@ app.use((req, res, next) => {
         res.header('Upgrade', 'websocket');
     }
     
-    if (req.headers['x-forwarded-proto'] !== 'https') {
+    if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
         return res.redirect('https://' + req.headers.host + req.url);
     }
     next();
@@ -216,6 +222,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+http.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 }); 
