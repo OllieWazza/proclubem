@@ -32,6 +32,17 @@ app.use((req, res, next) => {
     next();
 });
 
+// Health check endpoint (must be defined early)
+app.get('/api/status', (req, res) => {
+    res.status(200).json({
+        status: 'online',
+        environment: process.env.NODE_ENV || 'development',
+        port: process.env.PORT || 3000,
+        socketEnabled: true,
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Serve static files with appropriate headers
 app.get('/socket.io/socket.io.js', (req, res) => {
     res.setHeader('Content-Type', 'application/javascript');
@@ -47,17 +58,6 @@ app.use(express.static('public', {
         }
     }
 }));
-
-// Add a route to check server status - IMPORTANT: This must be defined before Socket.IO
-app.get('/api/status', (req, res) => {
-    res.json({
-        status: 'online',
-        environment: process.env.NODE_ENV || 'development',
-        port: process.env.PORT || 3000,
-        socketEnabled: true,
-        timestamp: new Date().toISOString()
-    });
-});
 
 // Create HTTP server
 const http = require('http').createServer(app);
@@ -229,8 +229,10 @@ io.on('connection', (socket) => {
     });
 });
 
+// Get the port from environment or use 3000 as fallback
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    console.log(`Socket.IO server available at ${process.env.NODE_ENV === 'production' ? 'https://proclubem-production.up.railway.app' : 'http://localhost:' + PORT}`);
+    console.log(`Server available at: ${process.env.NODE_ENV === 'production' ? 'https://proclubem-production.up.railway.app' : 'http://localhost:' + PORT}`);
+    console.log(`Health check endpoint: ${process.env.NODE_ENV === 'production' ? 'https://proclubem-production.up.railway.app' : 'http://localhost:' + PORT}/api/status`);
 }); 
