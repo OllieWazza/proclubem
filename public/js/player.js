@@ -635,6 +635,37 @@ class Player {
         animatePunch();
     }
 
+    kick() {
+        if (!this.isLocal || this.isStunned || !game.ball) return;
+        
+        const distanceToBall = this.mesh.position.distanceTo(game.ball.mesh.position);
+        if (distanceToBall < 2) {
+            game.ball.kick(this);
+            
+            // Kick animation
+            const rightLeg = this.rightUpperLeg;
+            const originalRotation = rightLeg.rotation.x;
+            const animationDuration = 300;
+            const startTime = Date.now();
+            
+            const animateKick = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(1, elapsed / animationDuration);
+                
+                if (progress < 0.5) {
+                    rightLeg.rotation.x = originalRotation - (Math.PI / 2) * (progress * 2);
+                } else {
+                    rightLeg.rotation.x = originalRotation - (Math.PI / 2) * (2 - progress * 2);
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateKick);
+                }
+            };
+            animateKick();
+        }
+    }
+
     createDevOverlay() {
         // Remove existing overlay if any
         this.removeDevOverlay();

@@ -19,6 +19,7 @@
             overflow: hidden;
             font-family: Arial, sans-serif;
             touch-action: none;
+            background-color: #000;
         }
         #gameCanvas {
             width: 100vw;
@@ -92,35 +93,7 @@
         /* Mobile-specific styles */
         @media (max-width: 800px) {
             #instructions {
-                font-size: 12px;
-                padding: 10px;
-                max-width: 200px;
-                pointer-events: auto;
-                cursor: pointer;
-                z-index: 100;
-            }
-            #instructions.collapsed {
-                max-height: 30px;
-                overflow: hidden;
-                padding: 5px 10px;
-                background: rgba(0, 0, 0, 0.5);
-                border-radius: 20px;
-            }
-            #instructions.collapsed h3 {
-                margin: 0;
-                font-size: 14px;
-            }
-            #instructions.collapsed p, 
-            #instructions.collapsed div, 
-            #instructions.collapsed h4 {
-                display: none;
-            }
-            #collapseIndicator {
-                position: absolute;
-                top: 7px;
-                right: 10px;
-                font-size: 16px;
-                cursor: pointer;
+                display: none; /* Hide default instructions on mobile */
             }
             #score {
                 font-size: 14px;
@@ -129,13 +102,17 @@
                 background: rgba(0, 0, 0, 0.5);
             }
             #stats {
-                bottom: 150px;
+                width: 150px;
+                top: 20px;
+                right: 20px;
+                bottom: auto;
+                padding: 5px;
             }
             .bar {
-                width: 150px;
+                width: 100%;
                 height: 15px;
             }
-            #mobileFpsCounter {
+            #desktopFpsCounter {
                 display: none;
             }
         }
@@ -143,6 +120,7 @@
         /* Mobile controls specific styles */
         .mobile-control {
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         .joystick {
             opacity: 0.9;
@@ -190,13 +168,30 @@
             margin-top: 0;
             font-size: 16px;
         }
+        
+        /* Fullscreen styles */
+        :fullscreen {
+            width: 100vw;
+            height: 100vh;
+        }
+        :-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+        }
+        :-moz-full-screen {
+            width: 100vw;
+            height: 100vh;
+        }
+        :-ms-fullscreen {
+            width: 100vw;
+            height: 100vh;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="ui">
-        <div id="instructions" class="collapsed">
-            <span id="collapseIndicator">▲</span>
+        <div id="instructions">
             <h3>Pro club 'em</h3>
             <p>- Score goals to win (first to 20 resets the match)!</p>
             <p>- Use combat to stop opponents.</p>
@@ -215,15 +210,6 @@
                 <p>- Q: Shoot Bullets (75 damage)</p>
                 <p>- P: Toggle Debug Mode</p>
                 <p>- Esc: Release Cursor</p>
-            </div>
-            <div id="mobileControlsInfo" style="display: none;">
-                <p>- Left Joystick: Move</p>
-                <p>- Right Joystick: Look/Aim</p>
-                <p>- SPRINT Button: Sprint</p>
-                <p>- JUMP Button: Jump</p>
-                <p>- KICK Button: Kick Ball (when near)</p>
-                <p>- PUNCH Button: Punch (25 damage)</p>
-                <p>- SHOOT Button: Shoot Bullets (75 damage)</p>
             </div>
         </div>
         <div id="score">Blue: 0 - Red: 0</div>
@@ -254,40 +240,22 @@
     <script src="js/stadium.js"></script>
     
     <script>
-        // Show appropriate controls based on device
+        // Initialize game when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if device is mobile
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
                              window.innerWidth <= 800 || window.orientation !== undefined;
-            
-            document.getElementById('desktopControls').style.display = isMobile ? 'none' : 'block';
-            document.getElementById('mobileControlsInfo').style.display = isMobile ? 'block' : 'none';
-            
-            // Set instructions to collapsed by default on mobile
-            if (isMobile) {
-                document.getElementById('instructions').classList.add('collapsed');
-            }
-            
-            // Toggle instructions collapse/expand
-            document.getElementById('collapseIndicator').addEventListener('click', function() {
-                const instructions = document.getElementById('instructions');
-                instructions.classList.toggle('collapsed');
-                this.textContent = instructions.classList.contains('collapsed') ? '▲' : '▼';
-            });
             
             // Check orientation on mobile
             if (isMobile) {
                 checkOrientation();
                 window.addEventListener('resize', checkOrientation);
                 window.addEventListener('orientationchange', checkOrientation);
-            }
-            
-            function checkOrientation() {
-                const orientationOverlay = document.getElementById('orientationOverlay');
-                if (window.innerHeight > window.innerWidth) {
-                    orientationOverlay.style.display = 'flex';
-                } else {
-                    orientationOverlay.style.display = 'none';
-                }
+                
+                // Request fullscreen on first interaction for mobile
+                document.addEventListener('touchstart', function() {
+                    requestFullscreen();
+                }, { once: true });
             }
             
             // Initialize game
@@ -301,6 +269,41 @@
                 height: window.innerHeight,
                 orientation: window.orientation
             });
+            
+            // Function to check orientation
+            function checkOrientation() {
+                const orientationOverlay = document.getElementById('orientationOverlay');
+                if (window.innerHeight > window.innerWidth) {
+                    orientationOverlay.style.display = 'flex';
+                } else {
+                    orientationOverlay.style.display = 'none';
+                    // Request fullscreen when in landscape
+                    requestFullscreen();
+                }
+            }
+            
+            // Function to request fullscreen
+            function requestFullscreen() {
+                if (isMobile) {
+                    const element = document.documentElement;
+                    
+                    if (document.fullscreenElement) return; // Already in fullscreen
+                    
+                    try {
+                        if (element.requestFullscreen) {
+                            element.requestFullscreen();
+                        } else if (element.webkitRequestFullscreen) {
+                            element.webkitRequestFullscreen();
+                        } else if (element.mozRequestFullScreen) {
+                            element.mozRequestFullScreen();
+                        } else if (element.msRequestFullscreen) {
+                            element.msRequestFullscreen();
+                        }
+                    } catch (error) {
+                        console.error('Fullscreen request failed:', error);
+                    }
+                }
+            }
         });
     </script>
 </body>

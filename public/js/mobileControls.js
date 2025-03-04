@@ -3,12 +3,13 @@ class MobileControls {
         this.game = game;
         this.isMobile = this.detectMobile();
         this.isActive = false;
+        
+        // Control sizes
         this.joystickSize = 120;
         this.actionButtonSize = 70;
         this.margin = 20;
-        this.isLandscape = window.innerWidth > window.innerHeight;
         
-        // Movement joystick state
+        // Movement joystick state (bottom left)
         this.moveJoystick = {
             active: false,
             startX: 0,
@@ -18,7 +19,7 @@ class MobileControls {
             direction: { x: 0, y: 0 }
         };
         
-        // Look joystick state
+        // Look joystick state (bottom right)
         this.lookJoystick = {
             active: false,
             startX: 0,
@@ -37,39 +38,16 @@ class MobileControls {
             shoot: false
         };
         
-        // Force mobile controls for testing or enable based on detection
-        // this.isMobile = true; // Uncomment to force mobile controls
-        
         if (this.isMobile) {
             console.log("Mobile device detected, initializing mobile controls");
             this.init();
-            // Show mobile controls info
-            const mobileControlsInfo = document.getElementById('mobileControlsInfo');
-            if (mobileControlsInfo) {
-                mobileControlsInfo.style.display = 'block';
-            }
-            const desktopControls = document.getElementById('desktopControls');
-            if (desktopControls) {
-                desktopControls.style.display = 'none';
-            }
-        } else {
-            console.log("Desktop device detected, not initializing mobile controls");
+            this.setupFullscreen();
         }
     }
     
     detectMobile() {
-        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isSmallScreen = window.innerWidth <= 800;
-        const hasOrientation = window.orientation !== undefined;
-        
-        console.log("Mobile detection:", { 
-            isMobileDevice, 
-            isSmallScreen, 
-            hasOrientation, 
-            userAgent: navigator.userAgent 
-        });
-        
-        return isMobileDevice || isSmallScreen || hasOrientation;
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+               window.innerWidth <= 800 || window.orientation !== undefined;
     }
     
     init() {
@@ -92,55 +70,40 @@ class MobileControls {
         
         // Handle orientation change
         window.addEventListener('resize', () => {
-            this.handleOrientationChange();
+            this.updateControlPositions();
         });
         
         window.addEventListener('orientationchange', () => {
-            this.handleOrientationChange();
+            this.updateControlPositions();
+            this.requestFullscreen();
         });
         
         console.log("Mobile controls initialized");
     }
     
-    handleOrientationChange() {
-        // Check if orientation has changed
-        const wasLandscape = this.isLandscape;
-        this.isLandscape = window.innerWidth > window.innerHeight;
-        
-        // If orientation changed, update control sizes and positions
-        if (wasLandscape !== this.isLandscape) {
-            // Adjust control sizes based on orientation
-            if (this.isLandscape) {
-                // Landscape mode - larger controls
-                this.joystickSize = 120;
-                this.actionButtonSize = 70;
-            } else {
-                // Portrait mode - smaller controls
-                this.joystickSize = 100;
-                this.actionButtonSize = 60;
+    setupFullscreen() {
+        // Request fullscreen when in landscape
+        document.addEventListener('touchstart', () => {
+            if (window.innerWidth > window.innerHeight) {
+                this.requestFullscreen();
             }
-            
-            // Update joystick sizes
-            this.moveJoystickOuter.style.width = `${this.joystickSize}px`;
-            this.moveJoystickOuter.style.height = `${this.joystickSize}px`;
-            this.lookJoystickOuter.style.width = `${this.joystickSize}px`;
-            this.lookJoystickOuter.style.height = `${this.joystickSize}px`;
-            
-            this.moveJoystickInner.style.width = `${this.joystickSize / 2}px`;
-            this.moveJoystickInner.style.height = `${this.joystickSize / 2}px`;
-            this.lookJoystickInner.style.width = `${this.joystickSize / 2}px`;
-            this.lookJoystickInner.style.height = `${this.joystickSize / 2}px`;
-            
-            // Update action button sizes
-            const actionButtons = document.querySelectorAll('.action-button');
-            actionButtons.forEach(button => {
-                button.style.width = `${this.actionButtonSize}px`;
-                button.style.height = `${this.actionButtonSize}px`;
-            });
-        }
+        }, { once: true });
+    }
+    
+    requestFullscreen() {
+        const element = document.documentElement;
         
-        // Always update positions when size changes
-        this.updateControlPositions();
+        if (document.fullscreenElement) return; // Already in fullscreen
+        
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
     }
     
     createMobileUI() {
@@ -152,17 +115,17 @@ class MobileControls {
         this.container.style.left = '0';
         this.container.style.width = '100%';
         this.container.style.height = '100%';
-        this.container.style.pointerEvents = 'none'; // Set to none for container, but auto for controls
+        this.container.style.pointerEvents = 'none';
         this.container.style.zIndex = '9999';
         document.body.appendChild(this.container);
         
-        // Create movement joystick
+        // Create movement joystick (bottom left)
         this.moveJoystickOuter = this.createJoystick('moveJoystickOuter', 'left');
         this.moveJoystickInner = this.createJoystickInner('moveJoystickInner');
         this.moveJoystickOuter.appendChild(this.moveJoystickInner);
         this.container.appendChild(this.moveJoystickOuter);
         
-        // Create look joystick
+        // Create look joystick (bottom right)
         this.lookJoystickOuter = this.createJoystick('lookJoystickOuter', 'right');
         this.lookJoystickInner = this.createJoystickInner('lookJoystickInner');
         this.lookJoystickOuter.appendChild(this.lookJoystickInner);
@@ -174,7 +137,95 @@ class MobileControls {
         // Update positions based on screen size
         this.updateControlPositions();
         
+        // Move health and stamina bars to top right for mobile
+        if (this.isMobile) {
+            const stats = document.getElementById('stats');
+            if (stats) {
+                stats.style.top = '20px';
+                stats.style.bottom = 'auto';
+            }
+        }
+        
+        // Hide default instructions and show mobile instructions
+        this.setupMobileInstructions();
+        
         console.log("Mobile UI created");
+    }
+    
+    setupMobileInstructions() {
+        // Hide default instructions
+        const instructions = document.getElementById('instructions');
+        if (instructions) {
+            instructions.style.display = 'none';
+        }
+        
+        // Create mobile instructions button
+        const mobileInstructionsBtn = document.createElement('div');
+        mobileInstructionsBtn.id = 'mobileInstructionsBtn';
+        mobileInstructionsBtn.textContent = 'ℹ️';
+        mobileInstructionsBtn.style.position = 'fixed';
+        mobileInstructionsBtn.style.top = '20px';
+        mobileInstructionsBtn.style.left = '20px';
+        mobileInstructionsBtn.style.width = '40px';
+        mobileInstructionsBtn.style.height = '40px';
+        mobileInstructionsBtn.style.borderRadius = '50%';
+        mobileInstructionsBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        mobileInstructionsBtn.style.color = 'white';
+        mobileInstructionsBtn.style.display = 'flex';
+        mobileInstructionsBtn.style.justifyContent = 'center';
+        mobileInstructionsBtn.style.alignItems = 'center';
+        mobileInstructionsBtn.style.fontSize = '20px';
+        mobileInstructionsBtn.style.zIndex = '9998';
+        mobileInstructionsBtn.style.pointerEvents = 'auto';
+        document.body.appendChild(mobileInstructionsBtn);
+        
+        // Create mobile instructions panel (initially hidden)
+        const mobileInstructions = document.createElement('div');
+        mobileInstructions.id = 'mobileInstructions';
+        mobileInstructions.style.position = 'fixed';
+        mobileInstructions.style.top = '70px';
+        mobileInstructions.style.left = '20px';
+        mobileInstructions.style.maxWidth = '250px';
+        mobileInstructions.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        mobileInstructions.style.color = 'white';
+        mobileInstructions.style.padding = '15px';
+        mobileInstructions.style.borderRadius = '5px';
+        mobileInstructions.style.fontSize = '14px';
+        mobileInstructions.style.zIndex = '9997';
+        mobileInstructions.style.display = 'none';
+        mobileInstructions.innerHTML = `
+            <h3>Pro club 'em</h3>
+            <p>- Score goals to win (first to 20 resets the match)!</p>
+            <p>- Use combat to stop opponents.</p>
+            <h4>Controls:</h4>
+            <p>- Left Joystick: Move</p>
+            <p>- Right Joystick: Look/Aim</p>
+            <p>- SPRINT Button: Sprint</p>
+            <p>- JUMP Button: Jump</p>
+            <p>- KICK Button: Kick Ball (when near)</p>
+            <p>- PUNCH Button: Punch (25 damage)</p>
+            <p>- SHOOT Button: Shoot Bullets (75 damage)</p>
+            <p>Players Online: <span id="mobilePlayerCount">0</span></p>
+        `;
+        document.body.appendChild(mobileInstructions);
+        
+        // Toggle instructions visibility
+        mobileInstructionsBtn.addEventListener('click', () => {
+            if (mobileInstructions.style.display === 'none') {
+                mobileInstructions.style.display = 'block';
+            } else {
+                mobileInstructions.style.display = 'none';
+            }
+        });
+        
+        // Sync player count
+        setInterval(() => {
+            const playerCount = document.getElementById('playerCount');
+            const mobilePlayerCount = document.getElementById('mobilePlayerCount');
+            if (playerCount && mobilePlayerCount) {
+                mobilePlayerCount.textContent = playerCount.textContent;
+            }
+        }, 1000);
     }
     
     createJoystick(id, position) {
@@ -185,11 +236,11 @@ class MobileControls {
         joystick.style.width = `${this.joystickSize}px`;
         joystick.style.height = `${this.joystickSize}px`;
         joystick.style.borderRadius = '50%';
-        joystick.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; // Increased opacity
-        joystick.style.border = '3px solid rgba(255, 255, 255, 0.9)'; // Thicker border, increased opacity
-        joystick.style.pointerEvents = 'auto'; // Important for touch events
-        joystick.style.touchAction = 'none'; // Prevent default touch actions
-        joystick.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)'; // Add glow effect
+        joystick.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+        joystick.style.border = '3px solid rgba(255, 255, 255, 0.9)';
+        joystick.style.pointerEvents = 'auto';
+        joystick.style.touchAction = 'none';
+        joystick.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
         
         if (position === 'left') {
             joystick.style.left = `${this.margin}px`;
@@ -210,28 +261,33 @@ class MobileControls {
         inner.style.width = `${this.joystickSize / 2}px`;
         inner.style.height = `${this.joystickSize / 2}px`;
         inner.style.borderRadius = '50%';
-        inner.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'; // Increased opacity
+        inner.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
         inner.style.left = '50%';
         inner.style.top = '50%';
         inner.style.transform = 'translate(-50%, -50%)';
         inner.style.pointerEvents = 'none';
-        inner.style.boxShadow = '0 0 5px rgba(255, 255, 255, 0.7)'; // Add glow effect
+        inner.style.boxShadow = '0 0 5px rgba(255, 255, 255, 0.7)';
         
         return inner;
     }
     
     createActionButtons() {
-        // Rearranged button configurations with more spacing
-        // Jump and Sprint moved to left side, other buttons on right with more spacing
+        // Button configurations as per requirements
         const buttonConfigs = [
-            // Left side buttons
-            { id: 'jumpButton', text: 'JUMP', action: 'jump', position: { left: this.margin + this.joystickSize + this.margin, bottom: this.margin + this.actionButtonSize * 1.5 } },
-            { id: 'sprintButton', text: 'SPRINT', action: 'sprint', position: { left: this.margin + this.joystickSize + this.margin, bottom: this.margin + this.actionButtonSize * 0.2 } },
+            // Above left joystick - JUMP
+            { id: 'jumpButton', text: 'JUMP', action: 'jump', position: { left: this.margin + (this.joystickSize - this.actionButtonSize) / 2, bottom: this.margin + this.joystickSize + this.margin } },
             
-            // Right side buttons with more spacing
-            { id: 'kickButton', text: 'KICK', action: 'kick', position: { right: this.margin + this.joystickSize + this.margin * 2, bottom: this.margin + this.actionButtonSize * 0.2 } },
-            { id: 'punchButton', text: 'PUNCH', action: 'punch', position: { right: this.margin + this.joystickSize + this.margin * 2, bottom: this.margin + this.actionButtonSize * 2 } },
-            { id: 'shootButton', text: 'SHOOT', action: 'shoot', position: { right: this.margin + this.joystickSize + this.margin * 2, bottom: this.margin + this.actionButtonSize * 3.8 } }
+            // Right of left joystick - SPRINT
+            { id: 'sprintButton', text: 'SPRINT', action: 'sprint', position: { left: this.margin + this.joystickSize + this.margin, bottom: this.margin + (this.joystickSize - this.actionButtonSize) / 2 } },
+            
+            // Above right joystick - SHOOT
+            { id: 'shootButton', text: 'SHOOT', action: 'shoot', position: { right: this.margin + (this.joystickSize - this.actionButtonSize) / 2, bottom: this.margin + this.joystickSize + this.margin } },
+            
+            // Left of right joystick - PUNCH
+            { id: 'punchButton', text: 'PUNCH', action: 'punch', position: { right: this.margin + this.joystickSize + this.margin, bottom: this.margin + (this.joystickSize - this.actionButtonSize) / 2 } },
+            
+            // Between joysticks at bottom - KICK
+            { id: 'kickButton', text: 'KICK', action: 'kick', position: { left: '50%', transform: 'translateX(-50%)', bottom: this.margin } }
         ];
         
         buttonConfigs.forEach(config => {
@@ -243,8 +299,8 @@ class MobileControls {
             button.style.width = `${this.actionButtonSize}px`;
             button.style.height = `${this.actionButtonSize}px`;
             button.style.borderRadius = '50%';
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; // Increased opacity
-            button.style.border = '3px solid rgba(255, 255, 255, 0.9)'; // Thicker border, increased opacity
+            button.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+            button.style.border = '3px solid rgba(255, 255, 255, 0.9)';
             button.style.display = 'flex';
             button.style.justifyContent = 'center';
             button.style.alignItems = 'center';
@@ -252,28 +308,40 @@ class MobileControls {
             button.style.fontWeight = 'bold';
             button.style.fontSize = '12px';
             button.style.userSelect = 'none';
-            button.style.pointerEvents = 'auto'; // Important for touch events
-            button.style.touchAction = 'none'; // Prevent default touch actions
-            button.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)'; // Add glow effect
+            button.style.pointerEvents = 'auto';
+            button.style.touchAction = 'none';
+            button.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
             
             // Set position
             Object.keys(config.position).forEach(key => {
-                button.style[key] = `${config.position[key]}px`;
+                button.style[key] = typeof config.position[key] === 'number' ? 
+                    `${config.position[key]}px` : config.position[key];
             });
             
             button.textContent = config.text;
             this.container.appendChild(button);
         });
-        
-        console.log("Action buttons created");
     }
     
     updateControlPositions() {
         const width = window.innerWidth;
         const height = window.innerHeight;
         
-        // Adjust margin based on screen size
+        // Adjust sizes based on screen dimensions
+        this.joystickSize = Math.min(120, Math.max(80, Math.floor(Math.min(width, height) * 0.15)));
+        this.actionButtonSize = Math.min(70, Math.max(50, Math.floor(this.joystickSize * 0.6)));
         this.margin = Math.min(20, Math.max(10, Math.floor(Math.min(width, height) * 0.03)));
+        
+        // Update joystick sizes
+        this.moveJoystickOuter.style.width = `${this.joystickSize}px`;
+        this.moveJoystickOuter.style.height = `${this.joystickSize}px`;
+        this.lookJoystickOuter.style.width = `${this.joystickSize}px`;
+        this.lookJoystickOuter.style.height = `${this.joystickSize}px`;
+        
+        this.moveJoystickInner.style.width = `${this.joystickSize / 2}px`;
+        this.moveJoystickInner.style.height = `${this.joystickSize / 2}px`;
+        this.lookJoystickInner.style.width = `${this.joystickSize / 2}px`;
+        this.lookJoystickInner.style.height = `${this.joystickSize / 2}px`;
         
         // Update joystick positions
         this.moveJoystickOuter.style.left = `${this.margin}px`;
@@ -282,38 +350,47 @@ class MobileControls {
         this.lookJoystickOuter.style.right = `${this.margin}px`;
         this.lookJoystickOuter.style.bottom = `${this.margin}px`;
         
-        // Update action buttons with new positions
+        // Update action buttons
         const jumpButton = document.getElementById('jumpButton');
         const sprintButton = document.getElementById('sprintButton');
-        const kickButton = document.getElementById('kickButton');
-        const punchButton = document.getElementById('punchButton');
         const shootButton = document.getElementById('shootButton');
+        const punchButton = document.getElementById('punchButton');
+        const kickButton = document.getElementById('kickButton');
         
-        // Left side buttons
         if (jumpButton) {
-            jumpButton.style.left = `${this.margin + this.joystickSize + this.margin}px`;
-            jumpButton.style.bottom = `${this.margin + this.actionButtonSize * 1.5}px`;
+            jumpButton.style.width = `${this.actionButtonSize}px`;
+            jumpButton.style.height = `${this.actionButtonSize}px`;
+            jumpButton.style.left = `${this.margin + (this.joystickSize - this.actionButtonSize) / 2}px`;
+            jumpButton.style.bottom = `${this.margin + this.joystickSize + this.margin}px`;
         }
         
         if (sprintButton) {
+            sprintButton.style.width = `${this.actionButtonSize}px`;
+            sprintButton.style.height = `${this.actionButtonSize}px`;
             sprintButton.style.left = `${this.margin + this.joystickSize + this.margin}px`;
-            sprintButton.style.bottom = `${this.margin + this.actionButtonSize * 0.2}px`;
-        }
-        
-        // Right side buttons with more spacing
-        if (kickButton) {
-            kickButton.style.right = `${this.margin + this.joystickSize + this.margin * 2}px`;
-            kickButton.style.bottom = `${this.margin + this.actionButtonSize * 0.2}px`;
-        }
-        
-        if (punchButton) {
-            punchButton.style.right = `${this.margin + this.joystickSize + this.margin * 2}px`;
-            punchButton.style.bottom = `${this.margin + this.actionButtonSize * 2}px`;
+            sprintButton.style.bottom = `${this.margin + (this.joystickSize - this.actionButtonSize) / 2}px`;
         }
         
         if (shootButton) {
-            shootButton.style.right = `${this.margin + this.joystickSize + this.margin * 2}px`;
-            shootButton.style.bottom = `${this.margin + this.actionButtonSize * 3.8}px`;
+            shootButton.style.width = `${this.actionButtonSize}px`;
+            shootButton.style.height = `${this.actionButtonSize}px`;
+            shootButton.style.right = `${this.margin + (this.joystickSize - this.actionButtonSize) / 2}px`;
+            shootButton.style.bottom = `${this.margin + this.joystickSize + this.margin}px`;
+        }
+        
+        if (punchButton) {
+            punchButton.style.width = `${this.actionButtonSize}px`;
+            punchButton.style.height = `${this.actionButtonSize}px`;
+            punchButton.style.right = `${this.margin + this.joystickSize + this.margin}px`;
+            punchButton.style.bottom = `${this.margin + (this.joystickSize - this.actionButtonSize) / 2}px`;
+        }
+        
+        if (kickButton) {
+            kickButton.style.width = `${this.actionButtonSize}px`;
+            kickButton.style.height = `${this.actionButtonSize}px`;
+            kickButton.style.left = '50%';
+            kickButton.style.transform = 'translateX(-50%)';
+            kickButton.style.bottom = `${this.margin}px`;
         }
     }
     
@@ -381,14 +458,16 @@ class MobileControls {
             button.addEventListener('touchstart', (e) => {
                 const action = button.dataset.action;
                 this.actionButtons[action] = true;
-                button.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                button.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                button.style.transform = 'scale(0.95)';
                 this.triggerAction(action, true);
             });
             
             button.addEventListener('touchend', (e) => {
                 const action = button.dataset.action;
                 this.actionButtons[action] = false;
-                button.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                button.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+                button.style.transform = '';
                 this.triggerAction(action, false);
             });
         });
@@ -396,12 +475,10 @@ class MobileControls {
     
     isTouchOnJoystick(touch, joystickElement) {
         const rect = joystickElement.getBoundingClientRect();
-        return (
-            touch.clientX >= rect.left &&
-            touch.clientX <= rect.right &&
-            touch.clientY >= rect.top &&
-            touch.clientY <= rect.bottom
-        );
+        return touch.clientX >= rect.left && 
+               touch.clientX <= rect.right && 
+               touch.clientY >= rect.top && 
+               touch.clientY <= rect.bottom;
     }
     
     isTouchActiveOnElement(touches, element) {
@@ -421,26 +498,28 @@ class MobileControls {
         // Calculate joystick displacement
         const deltaX = joystick.currentX - joystick.startX;
         const deltaY = joystick.currentY - joystick.startY;
+        
+        // Calculate distance from center
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        // Calculate max displacement (radius of outer joystick)
         const maxDistance = this.joystickSize / 2;
         
-        // Normalize and limit displacement
-        if (distance > maxDistance) {
-            const ratio = maxDistance / distance;
-            joystick.direction.x = deltaX * ratio / maxDistance;
-            joystick.direction.y = deltaY * ratio / maxDistance;
-            
-            // Position inner joystick at the edge
-            joystickInner.style.transform = `translate(calc(-50% + ${maxDistance * (deltaX / distance)}px), calc(-50% + ${maxDistance * (deltaY / distance)}px))`;
-        } else {
-            joystick.direction.x = deltaX / maxDistance;
-            joystick.direction.y = deltaY / maxDistance;
-            
-            // Position inner joystick
-            joystickInner.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
-        }
+        // Normalize direction
+        joystick.direction.x = deltaX / Math.max(distance, 1);
+        joystick.direction.y = deltaY / Math.max(distance, 1);
         
-        // Update player controls based on joystick input
+        // Clamp distance to max radius
+        const clampedDistance = Math.min(distance, maxDistance);
+        
+        // Calculate new position
+        const newX = joystick.direction.x * clampedDistance;
+        const newY = joystick.direction.y * clampedDistance;
+        
+        // Update inner joystick position
+        joystickInner.style.transform = `translate(calc(-50% + ${newX}px), calc(-50% + ${newY}px))`;
+        
+        // Update player controls
         this.updatePlayerControls();
     }
     
@@ -451,20 +530,24 @@ class MobileControls {
         joystick.active = false;
         joystick.direction.x = 0;
         joystick.direction.y = 0;
+        
+        // Reset inner joystick position
         joystickInner.style.transform = 'translate(-50%, -50%)';
         
-        // Update player controls to stop movement
+        // Update player controls
         this.updatePlayerControls();
     }
     
     resetActionButtonsIfNeeded(touches) {
         const actionButtons = document.querySelectorAll('.action-button');
+        
         actionButtons.forEach(button => {
             if (!this.isTouchActiveOnElement(touches, button)) {
                 const action = button.dataset.action;
                 if (this.actionButtons[action]) {
                     this.actionButtons[action] = false;
-                    button.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                    button.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+                    button.style.transform = '';
                     this.triggerAction(action, false);
                 }
             }
@@ -492,7 +575,7 @@ class MobileControls {
         }
         
         // Update camera rotation based on look joystick
-        if (this.lookJoystick.active && this.lookJoystick.direction.x !== 0) {
+        if (this.lookJoystick.active) {
             // Horizontal rotation (left/right)
             this.game.localPlayer.mesh.rotation.y -= this.lookJoystick.direction.x * 0.05;
             
@@ -516,31 +599,18 @@ class MobileControls {
         
         switch (action) {
             case 'jump':
-                if (isActive && !this.game.localPlayer.isJumping) {
-                    this.game.localPlayer.jump();
-                }
+                if (isActive) this.game.localPlayer.jump();
                 break;
             case 'kick':
-                if (isActive && this.game.ball) {
-                    const distanceToBall = this.game.localPlayer.mesh.position.distanceTo(this.game.ball.mesh.position);
-                    if (distanceToBall < 2) {
-                        this.game.ball.kick(this.game.localPlayer);
-                    }
-                }
+                if (isActive) this.game.localPlayer.kick();
                 break;
             case 'punch':
-                if (isActive) {
-                    this.game.localPlayer.punch();
-                }
+                if (isActive) this.game.localPlayer.punch();
                 break;
             case 'shoot':
-                if (isActive) {
-                    this.game.localPlayer.shoot();
-                }
+                if (isActive) this.game.localPlayer.shoot();
                 break;
-            case 'sprint':
-                // Handled in updatePlayerControls
-                break;
+            // Sprint is handled in updatePlayerControls
         }
     }
 } 
