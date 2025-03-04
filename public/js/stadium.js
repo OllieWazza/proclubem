@@ -431,7 +431,7 @@ class Stadium {
 
     createAdvertisingTexture() {
         const canvas = document.createElement('canvas');
-        canvas.width = 1024; // Increased from 512 for more detail
+        canvas.width = 512;
         canvas.height = 128;
         const ctx = canvas.getContext('2d');
 
@@ -439,42 +439,12 @@ class Stadium {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Create a pattern with clear spacing between sections
-        const sectionWidth = 340; // Width of each section
-        const spacing = 120; // Space between sections
-        
-        // Draw multiple sections with spacing
-        for (let x = 0; x < canvas.width; x += sectionWidth + spacing) {
-            // Section background with gradient
-            const gradient = ctx.createLinearGradient(x, 0, x + sectionWidth, 0);
-            gradient.addColorStop(0, '#f0f0f0');
-            gradient.addColorStop(0.5, '#ffffff');
-            gradient.addColorStop(1, '#f0f0f0');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(x, 0, sectionWidth, canvas.height);
-            
-            // Add border to section
-            ctx.strokeStyle = '#cccccc';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x + 2, 2, sectionWidth - 4, canvas.height - 4);
-            
-            // Text
-            ctx.fillStyle = '#000066'; // Dark blue for better contrast
-            ctx.font = 'bold 48px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Add text shadow for better readability
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 4;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            
-            ctx.fillText('www.scoutersports.com', x + sectionWidth/2, canvas.height/2);
-            
-            // Reset shadow
-            ctx.shadowColor = 'transparent';
-        }
+        // Text
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('www.scoutersports.com', canvas.width/2, canvas.height/2);
 
         const texture = new THREE.CanvasTexture(canvas);
         return texture;

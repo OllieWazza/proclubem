@@ -19,7 +19,6 @@
             overflow: hidden;
             font-family: Arial, sans-serif;
             touch-action: none;
-            background-color: #000;
         }
         #gameCanvas {
             width: 100vw;
@@ -28,7 +27,6 @@
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 1;
         }
         #ui {
             position: fixed;
@@ -37,7 +35,6 @@
             pointer-events: none;
             top: 0;
             left: 0;
-            z-index: 10;
         }
         #instructions {
             position: fixed;
@@ -49,8 +46,6 @@
             border-radius: 5px;
             font-size: 14px;
             transition: all 0.3s ease;
-            max-width: 300px;
-            z-index: 100;
         }
         #score {
             position: fixed;
@@ -62,7 +57,6 @@
             padding: 10px 20px;
             border-radius: 5px;
             font-size: 24px;
-            z-index: 100;
         }
         #stats {
             position: fixed;
@@ -72,7 +66,6 @@
             color: white;
             padding: 10px;
             border-radius: 5px;
-            z-index: 100;
         }
         .bar {
             width: 200px;
@@ -97,97 +90,52 @@
         
         /* Mobile-specific styles */
         @media (max-width: 800px) {
-            #infoButton {
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                width: 36px;
-                height: 36px;
-                background: rgba(0, 0, 0, 0.6);
-                color: white;
-                border-radius: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 20px;
-                font-weight: bold;
-                cursor: pointer;
-                pointer-events: auto;
-                z-index: 200;
-                border: 2px solid rgba(255, 255, 255, 0.5);
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            }
-            
             #instructions {
-                display: none;
-                position: fixed;
-                top: 55px;
-                left: 10px;
-                max-width: 80%;
-                max-height: 60%;
-                overflow-y: auto;
-                background: rgba(0, 0, 0, 0.85);
-                padding: 15px;
-                border-radius: 10px;
-                font-size: 14px;
-                z-index: 150;
+                font-size: 12px;
+                padding: 10px;
+                max-width: 200px;
                 pointer-events: auto;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+                cursor: pointer;
+                z-index: 100;
             }
-            
-            #instructions.visible {
-                display: block;
+            #instructions.collapsed {
+                max-height: 30px;
+                overflow: hidden;
+                padding: 5px 10px;
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 20px;
             }
-            
-            #instructions h3 {
-                margin-top: 0;
-                font-size: 16px;
+            #instructions.collapsed h3 {
+                margin: 0;
+                font-size: 14px;
             }
-            
-            #closeInstructions {
+            #instructions.collapsed p, 
+            #instructions.collapsed div, 
+            #instructions.collapsed h4 {
+                display: none;
+            }
+            #collapseIndicator {
                 position: absolute;
-                top: 10px;
+                top: 7px;
                 right: 10px;
-                width: 24px;
-                height: 24px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
+                font-size: 16px;
                 cursor: pointer;
             }
-            
             #score {
                 font-size: 14px;
                 padding: 5px 10px;
                 top: 10px;
-                background: rgba(0, 0, 0, 0.6);
-                border-radius: 20px;
+                background: rgba(0, 0, 0, 0.5);
             }
-            
             #stats {
-                bottom: 120px;
-                right: 10px;
+                bottom: 150px;
             }
-            
             .bar {
-                width: 120px;
-                height: 12px;
+                width: 150px;
+                height: 15px;
             }
-            
-            #desktopFpsCounter {
+            #mobileFpsCounter {
                 display: none;
-            }
-            
-            #mobileControls {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-                z-index: 100;
             }
         }
         
@@ -199,7 +147,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
+            background-color: rgba(0, 0, 0, 0.9);
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -235,22 +183,8 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="ui">
-        <div id="score">Blue: 0 - Red: 0</div>
-        <div id="stats">
-            <div class="bar" id="healthBar">
-                <div class="fill"></div>
-            </div>
-            <div class="bar" id="staminaBar">
-                <div class="fill"></div>
-            </div>
-        </div>
-        
-        <!-- Mobile info button -->
-        <div id="infoButton" style="display: none;">i</div>
-        
-        <!-- Instructions panel -->
-        <div id="instructions">
-            <span id="closeInstructions">&times;</span>
+        <div id="instructions" class="collapsed">
+            <span id="collapseIndicator">▲</span>
             <h3>Pro club 'em</h3>
             <p>- Score goals to win (first to 20 resets the match)!</p>
             <p>- Use combat to stop opponents.</p>
@@ -280,6 +214,15 @@
                 <p>- SHOOT Button: Shoot Bullets (75 damage)</p>
             </div>
         </div>
+        <div id="score">Blue: 0 - Red: 0</div>
+        <div id="stats">
+            <div class="bar" id="healthBar">
+                <div class="fill"></div>
+            </div>
+            <div class="bar" id="staminaBar">
+                <div class="fill"></div>
+            </div>
+        </div>
     </div>
     
     <!-- Orientation overlay for mobile devices -->
@@ -306,27 +249,33 @@
             
             document.getElementById('desktopControls').style.display = isMobile ? 'none' : 'block';
             document.getElementById('mobileControlsInfo').style.display = isMobile ? 'block' : 'none';
+            document.getElementById('desktopFpsCounter').style.display = isMobile ? 'none' : 'block';
             
-            // Mobile-specific setup
+            // Make instructions collapsible on mobile
             if (isMobile) {
-                // Show info button and hide instructions by default
-                const infoButton = document.getElementById('infoButton');
                 const instructions = document.getElementById('instructions');
-                const closeInstructions = document.getElementById('closeInstructions');
+                const collapseIndicator = document.getElementById('collapseIndicator');
                 
-                infoButton.style.display = 'flex';
+                // Start with collapsed instructions
+                let isCollapsed = true;
                 
-                // Toggle instructions on info button click
-                infoButton.addEventListener('click', function() {
-                    instructions.classList.toggle('visible');
+                // Toggle instructions on click
+                instructions.addEventListener('click', function(e) {
+                    if (e.target === collapseIndicator || e.target === instructions || e.target.tagName === 'H3') {
+                        isCollapsed = !isCollapsed;
+                        if (isCollapsed) {
+                            instructions.classList.add('collapsed');
+                            collapseIndicator.textContent = '▲';
+                        } else {
+                            instructions.classList.remove('collapsed');
+                            collapseIndicator.textContent = '▼';
+                        }
+                    }
                 });
-                
-                // Close instructions when X is clicked
-                closeInstructions.addEventListener('click', function() {
-                    instructions.classList.remove('visible');
-                });
-                
-                // Handle orientation for mobile devices
+            }
+            
+            // Handle orientation for mobile devices
+            if (isMobile) {
                 const orientationOverlay = document.getElementById('orientationOverlay');
                 
                 // Function to check orientation and show/hide overlay
@@ -356,43 +305,26 @@
                     
                     if (document.fullscreenElement) return; // Already in fullscreen
                     
-                    try {
-                        if (element.requestFullscreen) {
-                            element.requestFullscreen().catch(e => console.log('Fullscreen error:', e));
-                        } else if (element.webkitRequestFullscreen) {
-                            element.webkitRequestFullscreen().catch(e => console.log('Fullscreen error:', e));
-                        } else if (element.mozRequestFullScreen) {
-                            element.mozRequestFullScreen().catch(e => console.log('Fullscreen error:', e));
-                        } else if (element.msRequestFullscreen) {
-                            element.msRequestFullscreen().catch(e => console.log('Fullscreen error:', e));
-                        }
-                    } catch (err) {
-                        console.log('Fullscreen request failed:', err);
+                    if (element.requestFullscreen) {
+                        element.requestFullscreen();
+                    } else if (element.webkitRequestFullscreen) {
+                        element.webkitRequestFullscreen();
+                    } else if (element.mozRequestFullScreen) {
+                        element.mozRequestFullScreen();
+                    } else if (element.msRequestFullscreen) {
+                        element.msRequestFullscreen();
                     }
                 }
                 
                 // Check orientation on load
                 checkOrientation();
                 
-                // Check orientation on resize and orientation change with debouncing
-                let resizeTimeout;
-                window.addEventListener('resize', function() {
-                    clearTimeout(resizeTimeout);
-                    resizeTimeout = setTimeout(checkOrientation, 200);
-                });
+                // Check orientation on resize and orientation change
+                window.addEventListener('resize', checkOrientation);
+                window.addEventListener('orientationchange', checkOrientation);
                 
-                // Handle orientation change more carefully
-                window.addEventListener('orientationchange', function() {
-                    // Delay the check to allow the browser to complete the rotation
-                    setTimeout(checkOrientation, 300);
-                });
-                
-                // Request fullscreen on first interaction
-                document.addEventListener('touchstart', function() {
-                    requestFullscreen();
-                    // Remove this listener after first touch to prevent repeated attempts
-                    document.removeEventListener('touchstart', arguments.callee);
-                }, { once: true });
+                // Also request fullscreen on first interaction
+                document.addEventListener('click', requestFullscreen, { once: true });
             }
         });
     </script>
