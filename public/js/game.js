@@ -10,7 +10,6 @@ class Game {
         this.renderer.setClearColor(0x87CEEB); // Sky blue color
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.appendChild(this.renderer.domElement);
 
         // Socket.IO connection setup
         let serverUrl;

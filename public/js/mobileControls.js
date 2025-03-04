@@ -37,14 +37,39 @@ class MobileControls {
             shoot: false
         };
         
+        // Force mobile controls for testing or enable based on detection
+        // this.isMobile = true; // Uncomment to force mobile controls
+        
         if (this.isMobile) {
+            console.log("Mobile device detected, initializing mobile controls");
             this.init();
+            // Show mobile controls info
+            const mobileControlsInfo = document.getElementById('mobileControlsInfo');
+            if (mobileControlsInfo) {
+                mobileControlsInfo.style.display = 'block';
+            }
+            const desktopControls = document.getElementById('desktopControls');
+            if (desktopControls) {
+                desktopControls.style.display = 'none';
+            }
+        } else {
+            console.log("Desktop device detected, not initializing mobile controls");
         }
     }
     
     detectMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-               window.innerWidth <= 800 || window.orientation !== undefined;
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmallScreen = window.innerWidth <= 800;
+        const hasOrientation = window.orientation !== undefined;
+        
+        console.log("Mobile detection:", { 
+            isMobileDevice, 
+            isSmallScreen, 
+            hasOrientation, 
+            userAgent: navigator.userAgent 
+        });
+        
+        return isMobileDevice || isSmallScreen || hasOrientation;
     }
     
     init() {
@@ -54,7 +79,7 @@ class MobileControls {
         
         // Disable default touch behaviors
         document.addEventListener('touchmove', (e) => {
-            if (this.isActive) {
+            if (this.isActive && e.target.classList.contains('mobile-control')) {
                 e.preventDefault();
             }
         }, { passive: false });
@@ -73,6 +98,8 @@ class MobileControls {
         window.addEventListener('orientationchange', () => {
             this.handleOrientationChange();
         });
+        
+        console.log("Mobile controls initialized");
     }
     
     handleOrientationChange() {
@@ -125,7 +152,7 @@ class MobileControls {
         this.container.style.left = '0';
         this.container.style.width = '100%';
         this.container.style.height = '100%';
-        this.container.style.pointerEvents = 'auto';
+        this.container.style.pointerEvents = 'none'; // Set to none for container, but auto for controls
         this.container.style.zIndex = '9999';
         document.body.appendChild(this.container);
         
@@ -146,6 +173,8 @@ class MobileControls {
         
         // Update positions based on screen size
         this.updateControlPositions();
+        
+        console.log("Mobile UI created");
     }
     
     createJoystick(id, position) {
@@ -156,10 +185,11 @@ class MobileControls {
         joystick.style.width = `${this.joystickSize}px`;
         joystick.style.height = `${this.joystickSize}px`;
         joystick.style.borderRadius = '50%';
-        joystick.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-        joystick.style.border = '2px solid rgba(255, 255, 255, 0.8)';
-        joystick.style.pointerEvents = 'auto';
-        joystick.style.touchAction = 'none';
+        joystick.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; // Increased opacity
+        joystick.style.border = '3px solid rgba(255, 255, 255, 0.9)'; // Thicker border, increased opacity
+        joystick.style.pointerEvents = 'auto'; // Important for touch events
+        joystick.style.touchAction = 'none'; // Prevent default touch actions
+        joystick.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)'; // Add glow effect
         
         if (position === 'left') {
             joystick.style.left = `${this.margin}px`;
@@ -180,11 +210,12 @@ class MobileControls {
         inner.style.width = `${this.joystickSize / 2}px`;
         inner.style.height = `${this.joystickSize / 2}px`;
         inner.style.borderRadius = '50%';
-        inner.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        inner.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'; // Increased opacity
         inner.style.left = '50%';
         inner.style.top = '50%';
         inner.style.transform = 'translate(-50%, -50%)';
         inner.style.pointerEvents = 'none';
+        inner.style.boxShadow = '0 0 5px rgba(255, 255, 255, 0.7)'; // Add glow effect
         
         return inner;
     }
@@ -212,8 +243,8 @@ class MobileControls {
             button.style.width = `${this.actionButtonSize}px`;
             button.style.height = `${this.actionButtonSize}px`;
             button.style.borderRadius = '50%';
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-            button.style.border = '2px solid rgba(255, 255, 255, 0.8)';
+            button.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; // Increased opacity
+            button.style.border = '3px solid rgba(255, 255, 255, 0.9)'; // Thicker border, increased opacity
             button.style.display = 'flex';
             button.style.justifyContent = 'center';
             button.style.alignItems = 'center';
@@ -221,8 +252,9 @@ class MobileControls {
             button.style.fontWeight = 'bold';
             button.style.fontSize = '12px';
             button.style.userSelect = 'none';
-            button.style.pointerEvents = 'auto';
-            button.style.touchAction = 'none';
+            button.style.pointerEvents = 'auto'; // Important for touch events
+            button.style.touchAction = 'none'; // Prevent default touch actions
+            button.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)'; // Add glow effect
             
             // Set position
             Object.keys(config.position).forEach(key => {
@@ -232,6 +264,8 @@ class MobileControls {
             button.textContent = config.text;
             this.container.appendChild(button);
         });
+        
+        console.log("Action buttons created");
     }
     
     updateControlPositions() {

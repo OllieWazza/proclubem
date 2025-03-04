@@ -35,6 +35,7 @@
             pointer-events: none;
             top: 0;
             left: 0;
+            z-index: 100;
         }
         #instructions {
             position: fixed;
@@ -137,6 +138,17 @@
             #mobileFpsCounter {
                 display: none;
             }
+        }
+        
+        /* Mobile controls specific styles */
+        .mobile-control {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .joystick {
+            opacity: 0.9;
+        }
+        .action-button {
+            opacity: 0.9;
         }
         
         /* Landscape orientation overlay */
@@ -249,83 +261,46 @@
             
             document.getElementById('desktopControls').style.display = isMobile ? 'none' : 'block';
             document.getElementById('mobileControlsInfo').style.display = isMobile ? 'block' : 'none';
-            document.getElementById('desktopFpsCounter').style.display = isMobile ? 'none' : 'block';
             
-            // Make instructions collapsible on mobile
+            // Set instructions to collapsed by default on mobile
             if (isMobile) {
-                const instructions = document.getElementById('instructions');
-                const collapseIndicator = document.getElementById('collapseIndicator');
-                
-                // Start with collapsed instructions
-                let isCollapsed = true;
-                
-                // Toggle instructions on click
-                instructions.addEventListener('click', function(e) {
-                    if (e.target === collapseIndicator || e.target === instructions || e.target.tagName === 'H3') {
-                        isCollapsed = !isCollapsed;
-                        if (isCollapsed) {
-                            instructions.classList.add('collapsed');
-                            collapseIndicator.textContent = '▲';
-                        } else {
-                            instructions.classList.remove('collapsed');
-                            collapseIndicator.textContent = '▼';
-                        }
-                    }
-                });
+                document.getElementById('instructions').classList.add('collapsed');
             }
             
-            // Handle orientation for mobile devices
+            // Toggle instructions collapse/expand
+            document.getElementById('collapseIndicator').addEventListener('click', function() {
+                const instructions = document.getElementById('instructions');
+                instructions.classList.toggle('collapsed');
+                this.textContent = instructions.classList.contains('collapsed') ? '▲' : '▼';
+            });
+            
+            // Check orientation on mobile
             if (isMobile) {
-                const orientationOverlay = document.getElementById('orientationOverlay');
-                
-                // Function to check orientation and show/hide overlay
-                function checkOrientation() {
-                    if (window.innerHeight > window.innerWidth) {
-                        // Portrait mode
-                        orientationOverlay.style.display = 'flex';
-                        
-                        // Try to force landscape if supported
-                        if (screen.orientation && screen.orientation.lock) {
-                            screen.orientation.lock('landscape').catch(function(error) {
-                                console.log('Orientation lock failed: ', error);
-                            });
-                        }
-                    } else {
-                        // Landscape mode
-                        orientationOverlay.style.display = 'none';
-                        
-                        // Request fullscreen when in landscape
-                        requestFullscreen();
-                    }
-                }
-                
-                // Function to request fullscreen
-                function requestFullscreen() {
-                    const element = document.documentElement;
-                    
-                    if (document.fullscreenElement) return; // Already in fullscreen
-                    
-                    if (element.requestFullscreen) {
-                        element.requestFullscreen();
-                    } else if (element.webkitRequestFullscreen) {
-                        element.webkitRequestFullscreen();
-                    } else if (element.mozRequestFullScreen) {
-                        element.mozRequestFullScreen();
-                    } else if (element.msRequestFullscreen) {
-                        element.msRequestFullscreen();
-                    }
-                }
-                
-                // Check orientation on load
                 checkOrientation();
-                
-                // Check orientation on resize and orientation change
                 window.addEventListener('resize', checkOrientation);
                 window.addEventListener('orientationchange', checkOrientation);
-                
-                // Also request fullscreen on first interaction
-                document.addEventListener('click', requestFullscreen, { once: true });
             }
+            
+            function checkOrientation() {
+                const orientationOverlay = document.getElementById('orientationOverlay');
+                if (window.innerHeight > window.innerWidth) {
+                    orientationOverlay.style.display = 'flex';
+                } else {
+                    orientationOverlay.style.display = 'none';
+                }
+            }
+            
+            // Initialize game
+            const game = new Game();
+            
+            // Debug info
+            console.log('Device detection:', { 
+                isMobile, 
+                userAgent: navigator.userAgent,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                orientation: window.orientation
+            });
         });
     </script>
 </body>
