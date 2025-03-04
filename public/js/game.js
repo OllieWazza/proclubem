@@ -14,7 +14,7 @@ class Game {
         // Socket.IO connection with Railway configuration
         const serverUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : 'https://proclubem-production.up.railway.app';
+            : 'wss://proclubem-production.up.railway.app';
             
         this.socket = io(serverUrl, {
             path: '/socket.io',
@@ -25,7 +25,8 @@ class Game {
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,
-            timeout: 45000
+            timeout: 45000,
+            withCredentials: true
         });
         this.players = new Map();
         this.localPlayer = null;
