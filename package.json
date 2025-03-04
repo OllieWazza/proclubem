@@ -1,18 +1,40 @@
 {
-  "name": "soccer-combat",
+  "name": "proclubem",
   "version": "1.0.0",
   "description": "A multiplayer soccer game with combat elements",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "server": "node server.js"
+    "build": "echo 'No build step required'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OllieWazza/proclubem.git"
+  },
+  "keywords": [
+    "soccer",
+    "game",
+    "multiplayer",
+    "combat",
+    "three.js",
+    "websocket"
+  ],
+  "author": "Ollie Warren",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/OllieWazza/proclubem/issues"
+  },
+  "homepage": "https://github.com/OllieWazza/proclubem#readme"
 } 
